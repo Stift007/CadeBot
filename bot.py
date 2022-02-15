@@ -61,7 +61,7 @@ async def on_shard_disconnect(shard_id):
 
 @client.event
 async def on_ready():
-  await client.change_presence(status=discord.Status.idle,activity=discord.Activity(type=discord.ActivityType.listening,name=f"🎧 {len(client.guilds)} Servers listening to Music!"))
+  await client.change_presence(status=discord.Status.dnd,activity=discord.Activity(type=discord.ActivityType.listening,name=f"🎧 {len(client.guilds)} Servers listening!"))
 
 
 @slash.slash(name="help",description="Help!",options=[
