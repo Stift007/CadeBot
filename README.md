@@ -16,3 +16,5 @@ Commands:
 
 **New Command**
 /stop
+
+If you take the code- bit dumb- at least change it a lot- becuase like come on man be unique- <3
