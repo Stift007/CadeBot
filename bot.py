@@ -130,7 +130,7 @@ async def stop(ctx):
     try:
         player:MusicPlayer = music.get_player(guild_id=ctx.guild.id)
         await player.stop()
-        await ctx.send("⏹ Killed the Player!",hidden=True)
+        await ctx.send("⏹ Stopped: {song.name}",hidden=True)
     except:
         await ctx.send(":open_mouth: Nah, nothing playing rn...")
 
