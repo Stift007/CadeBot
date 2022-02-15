@@ -16,7 +16,7 @@ music = DiscordUtils.Music()
 
 @client.event
 async def on_shard_connect(shard_id):
-    logger.warning("Shard Connect!")
+    logger.warning("Shard Connected!")
     embed = discord.Embed(title="Shard Connection",description=f"""
 ✔ | Shard `{shard_id}` has successfully connected!!
 :link: | [Discord Status](https://discordstatus.com)
