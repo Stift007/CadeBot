@@ -14,6 +14,7 @@ slash = SlashCommand(client,sync_commands=True)
 music = DiscordUtils.Music()
 
 
+
 @client.event
 async def on_shard_connect(shard_id):
     logger.warning("Shard Connected!")
@@ -61,7 +62,7 @@ async def on_shard_disconnect(shard_id):
 
 @client.event
 async def on_ready():
-  await client.change_presence(status=discord.Status.dnd,activity=discord.Activity(type=discord.ActivityType.listening,name=f"🎧 {len(client.guilds)} Servers listening!"))
+  await client.change_presence(status=discord.Status.dnd,activity=discord.Activity(type=discord.ActivityType.listening,name=f"🎧 {(client.guilds)} Servers listening!"))
 
 
 @slash.slash(name="help",description="Help!",options=[
@@ -72,27 +73,13 @@ async def on_ready():
     option_type=3
   )
 ])
-async def help(ctx,command=None):
-    if not command:
-        embed = discord.Embed(color=discord.Color.random(),title="Help")
-        for command in client.commands:
-            embed.add_field(name=command.name,value=f'{command.help}\n`{command.usage}`',inline=False)
-        await ctx.send(":ok_hand: Check your DMs!")
-        await ctx.author.send(embed=embed)
-    else:
-        command = client.get_command(command)
-        if command:
-            embed = discord.Embed(title=command.name,description=f'{command.help}\n`{command.usage}`')
-            await ctx.send(":ok_hand: Check your DMs!")
-            await ctx.author.send(embed=embed)
-        else:
-            await ctx.send(":open_mouth: Wow, such empty...")
+
 
 @slash.slash(name="join",description="Joins your VC")
 async def join(ctx):
     voice = ctx.author.voice
     if not voice:
-        return await ctx.send("You're not in a voice channel!")
+        return await ctx.send("You're not in a Voice Channel. If this is an error please join the support server!")
     await ctx.author.voice.channel.connect()
     await ctx.send('Joined!')
 
@@ -104,7 +91,7 @@ async def play(ctx, query=None,bettersearch=False):
     if not query:
         return await ctx.send("Please specify a search query...")
     if not ctx.guild.voice_client:
-        return await ctx.send("I am not connected to any VOice channel!")
+        return await ctx.send("I am not connected to a Voice Channel. If this is an error please join the support server!")
     player = music.get_player(guild_id=ctx.guild.id)
     if not player:
         player = music.create_player(ctx, ffmpeg_error_betterfix=True)
@@ -123,7 +110,7 @@ async def queue(ctx):
         player = music.get_player(guild_id=ctx.guild.id)
         await ctx.send(",".join(song.name for song in player.current_queue()))
     except:
-        await ctx.send(":open_mouth: Wow, such empty...")
+        await ctx.send(":open_mouth: There is nothing in the queue. If this is an error please join the support server!")
 
 @slash.slash(name="stop",description="Stop the Player")
 async def stop(ctx):
@@ -132,7 +119,7 @@ async def stop(ctx):
         await player.stop()
         await ctx.send("⏹ Stopped: {song.name}",hidden=True)
     except:
-        await ctx.send(":open_mouth: Nah, nothing playing rn...")
+        await ctx.send(":open_mouth: There is nothing to stop! If this is an error please join the support server!")
 
 @slash.slash(name="loop",description="Toggle Loop")
 async def loop(ctx):
@@ -148,7 +135,7 @@ async def skip(ctx):
     try:
         player = music.get_player(guild_id=ctx.guild.id)
         song = await player.skip()
-        await ctx.send(f"⏩ Skipped from {song[0].name} to {song[1].name}!")
+        await ctx.send(f"⏩ Skipped {song[0].name} to {song[1].name}!")
     except Exception as error:
         await ctx.send(f":x: {error}")
 
@@ -174,7 +161,7 @@ async def nowplaying(ctx):
         song = player.now_playing()
         await ctx.send(song.name)
     except:
-        await ctx.send(":open_mouth: Wow, such empty...")
+        await ctx.send(":open_mouth: No songs are playing! If this is an error please join the support server!")
 
 @slash.slash(name="volume",description="Adjust the Volume",options=[
   create_option(name="volume",description='New Volume',option_type=4,required=False)
@@ -187,7 +174,7 @@ async def volume(ctx,volume:int=100):
     except Exception as error:
         await ctx.send(error)    
 
-@slash.slash(name="pause",description="Pause the Player")
+@slash.slash(name="pause",description="Pause the Song")
 async def pause(ctx):
     try:
         player = music.get_player(guild_id=ctx.guild.id)
@@ -196,7 +183,7 @@ async def pause(ctx):
     except Exception as error:
         await ctx.send(error)
 
-@slash.slash(name="resume",description="Resume the Player")
+@slash.slash(name="resume",description="Resume the Song")
 async def resume(ctx):
     try:
         player = music.get_player(guild_id=ctx.guild.id)
@@ -211,6 +198,6 @@ async def leave(ctx):
     voice = ctx.author.voice
     myvoice = ctx.guild.me.voice
     if not voice or not myvoice:
-        return await ctx.send("Either me or you aren't in a voice channel!",hidden=True)
+        return await ctx.send("You are not in a Voice Channel! If this is an error please join the support server!",hidden=True)
     await ctx.voice_client.disconnect()
-    await ctx.send('Left!')
+    await ctx.send('Left The Voice Channel.')
