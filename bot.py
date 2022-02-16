@@ -79,7 +79,7 @@ async def on_ready():
 async def join(ctx):
     voice = ctx.author.voice
     if not voice:
-        return await ctx.send("You're not in a Voice Channel. If this is an error please join the support server!")
+        return await ctx.send("You're not in a Voice Channel! If this is an error please join the support server!")
     await ctx.author.voice.channel.connect()
     await ctx.send('Joined!')
 
