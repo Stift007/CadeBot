@@ -9,7 +9,7 @@ from loguru import logger
 from discord_slash import SlashCommand
 from discord_slash.utils.manage_commands import create_option
 
-client = commands.AutoShardedBot(command_prefix='c!',case_insensitive=True)#,shard_count=100)
+client = commands.AutoShardedBot(command_prefix='c!')
 slash = SlashCommand(client,sync_commands=True)
 music = DiscordUtils.Music()
 
@@ -28,23 +28,6 @@ async def on_shard_connect(shard_id):
     """)
     await client.get_guild(942148719590113300).get_channel(942403453228048406).send(embed=embed)
 
-
-@client.event
-async def on_shard_reconnect(shard_id):
-    logger.warning("Shard Reonnect!")
-
-    embed = discord.Embed(title="Shard Reconnected",description=f"""
-✔ | Shard `{shard_id}` has successfully reconnected!!
-:link: | [Discord Status](https://discordstatus.com)
-:robot: | `{client.command_prefix}ping`
-    """,color=0x00ff00)
-    embed.add_field(name="Shard Information",value=f"""
-    🌐 | Shard `{shard_id}`
-    :date: | Time & Date: `{strftime('%H:%M:%S')}`-`{strftime('%D')}`
-    """)
-    await client.get_guild(942148719590113300).get_channel(942403453228048406).send(embed=embed)
-
-
 @client.event
 async def on_shard_disconnect(shard_id):
     logger.warning("Shard Down!")
@@ -61,32 +44,8 @@ async def on_shard_disconnect(shard_id):
 
 @client.event
 async def on_ready():
-  await client.change_presence(status=discord.Status.dnd,activity=discord.Activity(type=discord.ActivityType.listening,name=f"🎧 {len(client.guilds)} Servers listening!"))
+  await client.change_presence(status=discord.Status.dnd,activity=discord.Activity(type=discord.ActivityType.listening,name=f"🎧 Music, on {len(client.guilds)} Servers!"))
 
-
-@slash.slash(name="help",description="Help!",options=[
-  create_option(
-    name="command",
-    description='Command',
-    required=False,
-    option_type=3
-  )
-])
-async def help(ctx,command=None):
-    if not command:
-        embed = discord.Embed(color=discord.Color.random(),title="Help")
-        for command in client.commands:
-            embed.add_field(name=command.name,value=f'{command.help}\n`{command.usage}`',inline=False)
-        await ctx.send(":ok_hand: Check your DMs!")
-        await ctx.author.send(embed=embed)
-    else:
-        command = client.get_command(command)
-        if command:
-            embed = discord.Embed(title=command.name,description=f'{command.help}\n`{command.usage}`')
-            await ctx.send(":ok_hand: Check your DMs!")
-            await ctx.author.send(embed=embed)
-        else:
-            await ctx.send(":open_mouth: Wow, such empty...")
 
 @slash.slash(name="join",description="Joins your VC")
 async def join(ctx):
