@@ -1,9 +1,9 @@
 ## Cade Information
 
-Cade is a discord music bot. Thats it. Nothing special.
+Cade is a discord music bot with crystal-clear Audio, that's free, 24/7!
 ## Commands
 
-The commands are simple. We legit use / commands as discord are going to remove prefix commands. See, we are keeping up. :)
+The commands are simple. We have, from the start, decided to use Slash Commands, because we didn't want to apply message intents (See, we're keeping up with progress!)
 
 ```
 /play
