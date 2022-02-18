@@ -65,15 +65,19 @@ async def on_ready():
   await client.change_presence(status=discord.Status.dnd,activity=discord.Activity(type=discord.ActivityType.listening,name=f"🎧 {len(client.guilds)} Servers listening!"))
 
 
-@slash.slash(name="help",description="Help!",options=[
-  create_option(
-    name="command",
-    description='Command',
-    required=False,
-    option_type=3
-  )
-])
 
+@slash.slash(name="radio",description="Stream Webradio!",options=[
+    create_option(name="url",description="The Radio URL",option_type=3,required=False)])
+async def radio(ctx, url: str = 'http://stream.radioparadise.com/rock-128'):
+    channel = ctx.message.author.voice.channel
+    global player
+    try:
+        player = await channel.connect()
+    except:
+        pass
+    await ctx.send("Now Streaming {}!".format(url),hidden=True)
+    player.play(discord.FFmpegPCMAudio(url))
+    
 
 @slash.slash(name="join",description="Joins your VC")
 async def join(ctx):
