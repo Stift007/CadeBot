@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import DiscordUtils
 from DiscordUtils.Music import MusicPlayer,Song
 import discord
@@ -29,6 +29,10 @@ async def on_shard_connect(shard_id):
     """)
     await client.get_guild(942148719590113300).get_channel(942403453228048406).send(embed=embed)
 
+@tasks.loop(seconds=25)
+async def presence_change():
+  await client.change_presence(status=discord.Status.dnd,activity=discord.Activity(type=discord.ActivityType.listening,name=f"🎧 to Music in {len(client.guilds)} Servers!"))
+    
 
 @client.event
 async def on_shard_reconnect(shard_id):
@@ -62,7 +66,7 @@ async def on_shard_disconnect(shard_id):
 
 @client.event
 async def on_ready():
-  await client.change_presence(status=discord.Status.dnd,activity=discord.Activity(type=discord.ActivityType.listening,name=f"🎧 {len(client.guilds)} Servers listening!"))
+    await presence_change.start()
 
 
 
