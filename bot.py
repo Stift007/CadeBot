@@ -112,6 +112,16 @@ async def play(ctx, query=None,bettersearch=False):
         song = await player.queue(query,search=True,bettersearch=bettersearch)
         await ctx.send(f'Queued: {song.name}')
 
+@slash.slash(name="suggest",description="Suggest a feature/Command",options=[
+    create_option(name="suggestion",description="Your Suggestion",option_type=3, required=True)
+])
+async def suggest(ctx,suggestion):
+    embed = discord.Embed(title="New Suggestion!",description=f"Suggestion by {ctx.author} ({ctx.author.id})")
+    embed.add_field(name="Suggestion",value=suggestion)
+    await client.get_channel(950449511698948166).send(embed=embed)
+    await ctx.send("Your suggestion has been posted!",hidden=True)
+    
+    
 @slash.slash(name="queue",description="View the Queue")
 async def queue(ctx):
     try:
