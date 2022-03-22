@@ -36,7 +36,7 @@ A) Chances are there, but I don't think so. Besides, who would actually pay mone
 FAQ Will be updated every few days.
 
 ## Contributing
-If you feel the urge to fix my (crappy) code, then feel free to create a Pull Request! Note, that we only accept *helpful* PR's. Don't expect us to merge a PR, where you just changed some descriptions
+If you feel the urge to fix my code, then feel free to create a Pull Request! Note, that we only accept *helpful* PR's. Don't expect us to merge a PR, where you just changed some descriptions, please put actual Effort in this...
 
 ## License
 [MIT](https://github.com/Stift007/CadeBot/blob/main/LICENSE)
