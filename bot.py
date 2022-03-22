@@ -32,22 +32,6 @@ async def on_shard_connect(shard_id):
 @tasks.loop(seconds=25)
 async def presence_change():
   await client.change_presence(status=discord.Status.dnd,activity=discord.Activity(type=discord.ActivityType.listening,name=f"🎧 to Music in {len(client.guilds)} Servers!"))
-    
-
-@client.event
-async def on_shard_reconnect(shard_id):
-    logger.warning("Shard Reonnect!")
-
-    embed = discord.Embed(title="Shard Reconnected",description=f"""
-✔ | Shard `{shard_id}` has successfully reconnected!!
-:link: | [Discord Status](https://discordstatus.com)
-:robot: | `{client.command_prefix}ping`
-    """,color=0x00ff00)
-    embed.add_field(name="Shard Information",value=f"""
-    🌐 | Shard `{shard_id}`
-    :date: | Time & Date: `{strftime('%H:%M:%S')}`-`{strftime('%D')}`
-    """)
-    await client.get_guild(942148719590113300).get_channel(942403453228048406).send(embed=embed)
 
 
 @client.event
@@ -68,20 +52,6 @@ async def on_shard_disconnect(shard_id):
 async def on_ready():
     await presence_change.start()
 
-
-
-@slash.slash(name="radio",description="Stream Webradio!",options=[
-    create_option(name="url",description="The Radio URL",option_type=3,required=False)])
-async def radio(ctx, url: str = 'http://stream.radioparadise.com/rock-128'):
-    channel = ctx.message.author.voice.channel
-    global player
-    try:
-        player = await channel.connect()
-    except:
-        pass
-    await ctx.send("Now Streaming {}!".format(url),hidden=True)
-    player.play(discord.FFmpegPCMAudio(url))
-    
 
 @slash.slash(name="join",description="Joins your VC")
 async def join(ctx):
