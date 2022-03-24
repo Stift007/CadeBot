@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 import DiscordUtils
 from DiscordUtils.Music import MusicPlayer,Song
 import discord
@@ -9,16 +9,15 @@ from loguru import logger
 from discord_slash import SlashCommand
 from discord_slash.utils.manage_commands import create_option
 
-client = commands.AutoShardedBot(command_prefix='c!',case_insensitive=True)#,shard_count=100)
+client = commands.AutoShardedBot(command_prefix='c!',case_insensitive=True)#shard_count=100)
 slash = SlashCommand(client,sync_commands=True)
 music = DiscordUtils.Music()
 
 
-
 @client.event
 async def on_shard_connect(shard_id):
-    logger.warning("Shard Connected!")
-    embed = discord.Embed(title="Shard Connection",description=f"""
+    logger.warning("Shard Connect - BETA")
+    embed = discord.Embed(title="Shard Connection - BETA",description=f"""
 ✔ | Shard `{shard_id}` has successfully connected!!
 :link: | [Discord Status](https://discordstatus.com)
 :robot: | `{client.command_prefix}ping`
@@ -29,15 +28,30 @@ async def on_shard_connect(shard_id):
     """)
     await client.get_guild(942148719590113300).get_channel(942403453228048406).send(embed=embed)
 
-@tasks.loop(seconds=25)
-async def presence_change():
-  await client.change_presence(status=discord.Status.dnd,activity=discord.Activity(type=discord.ActivityType.listening,name=f"🎧 to Music in {len(client.guilds)} Servers!"))
 
+@client.event
+async def on_shard_reconnect(shard_id):
+    logger.warning("Shard Reonnect - BETA")
+
+    embed = discord.Embed(title="Shard Reconnected - BETA",description=f"""
+✔ | Shard `{shard_id}` Reconnected!!
+:link: | [Discord Status](https://discordstatus.com)
+:robot: | `{client.command_prefix}ping`
+    """,color=0x00ff00)
+    embed.add_field(name="Shard Information",value=f"""
+    🌐 | Shard `{shard_id}`
+    :date: | Time & Date: `{strftime('%H:%M:%S')}`-`{strftime('%D')}`
+    """)
+    await client.get_guild(942148719590113300).get_channel(942403453228048406).send(embed=embed)
+    
+@slash.slash(name="ping",description="Wanna play PING PONG ;)")
+async def ping(ctx):
+    await ctx.send(f'My ping is** {round(client.latency*1000)} Ms**')
 
 @client.event
 async def on_shard_disconnect(shard_id):
-    logger.warning("Shard Down!")
-    embed = discord.Embed(title="Shard Outage",description=f"""
+    logger.warning("Shard Down - BETA")
+    embed = discord.Embed(title="Shard Outage - BETA",description=f"""
 ❌ | Shard `{shard_id}` is currently having an outage!
 :link: | [Discord Status](https://discordstatus.com)
 :robot: | `{client.command_prefix}ping`
@@ -48,16 +62,47 @@ async def on_shard_disconnect(shard_id):
     """)
     await client.get_guild(942148719590113300).get_channel(942403453228048406).send(embed=embed)
 
+    
+from discord.ext import tasks
+import asyncio
+
 @client.event
 async def on_ready():
-    await presence_change.start()
+  await statusCycle.start()
 
+@tasks.loop(seconds=2)
+async def statusCycle():
+    stats = [f"{len(client.guilds)} Servers!","Glory 4 Ukraine", "Cade BETA"]
+    for s in stats:
+      await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,name=s),status=discord.Status.dnd)
+      await asyncio.sleep(20)
 
+@slash.slash(name="suggest",description="Suggest a feature/Command",options=[
+    create_option(name="suggestion",description="Your Suggestion",option_type=3, required=True)
+])
+async def suggest(ctx,suggestion):
+    embed = discord.Embed(title="New Suggestion!",description=f"Suggestion by {ctx.author} ({ctx.author.id})")
+    embed.add_field(name="Suggestion",value=suggestion)
+    await client.get_channel(950449511698948166).send(embed=embed)
+    await ctx.send("Your suggestion has been posted!",hidden=True)
+
+@slash.slash(name="serversupport",description="Gets a server representative to join the server",options=[
+create_option(name="invite",description="discord.gg/",option_type=3,required=True),
+create_option(name="reason",description="Why you need a Support Member in your server",option_type=3, required=True)
+])
+async def serversupport(ctx,invite, reason):
+    embed = discord.Embed(title="Support Request",description=f"Suggestion by {ctx.author} ({ctx.author.id})")
+    embed.add_field(name="Invite",value=invite)
+    embed.add_field(name="Reason",value=reason)
+    await client.get_channel(955885682033852436).send(embed=embed)
+    await ctx.send("Sent request: This may take up to 1-2 Working Days!",hidden=True)
+        
+ 
 @slash.slash(name="join",description="Joins your VC")
 async def join(ctx):
     voice = ctx.author.voice
     if not voice:
-        return await ctx.send("You're not in a Voice Channel! If this is an error please join the support server!")
+        return await ctx.send("You're not in a voice channel!")
     await ctx.author.voice.channel.connect()
     await ctx.send('Joined!')
 
@@ -69,7 +114,7 @@ async def play(ctx, query=None,bettersearch=False):
     if not query:
         return await ctx.send("Please specify a search query...")
     if not ctx.guild.voice_client:
-        return await ctx.send("I am not connected to a Voice Channel. If this is an error please join the support server!")
+        return await ctx.send("I am not connected to any VOice channel!")
     player = music.get_player(guild_id=ctx.guild.id)
     if not player:
         player = music.create_player(ctx, ffmpeg_error_betterfix=True)
@@ -82,32 +127,22 @@ async def play(ctx, query=None,bettersearch=False):
         song = await player.queue(query,search=True,bettersearch=bettersearch)
         await ctx.send(f'Queued: {song.name}')
 
-@slash.slash(name="suggest",description="Suggest a feature/Command",options=[
-    create_option(name="suggestion",description="Your Suggestion",option_type=3, required=True)
-])
-async def suggest(ctx,suggestion):
-    embed = discord.Embed(title="New Suggestion!",description=f"Suggestion by {ctx.author} ({ctx.author.id})")
-    embed.add_field(name="Suggestion",value=suggestion)
-    await client.get_channel(950449511698948166).send(embed=embed)
-    await ctx.send("Your suggestion has been posted!",hidden=True)
-    
-    
 @slash.slash(name="queue",description="View the Queue")
 async def queue(ctx):
     try:
         player = music.get_player(guild_id=ctx.guild.id)
         await ctx.send(",".join(song.name for song in player.current_queue()))
     except:
-        await ctx.send(":open_mouth: There is nothing in the queue. If this is an error please join the support server!")
+        await ctx.send(":open_mouth: Kinda quiet here....")
 
 @slash.slash(name="stop",description="Stop the Player")
 async def stop(ctx):
     try:
         player:MusicPlayer = music.get_player(guild_id=ctx.guild.id)
         await player.stop()
-        await ctx.send("⏹ Stopped: {song.name}",hidden=True)
+        await ctx.send("⏹ Killed the Player!",hidden=True)
     except:
-        await ctx.send(":open_mouth: There is nothing to stop! If this is an error please join the support server!")
+        await ctx.send(":open_mouth: Nah, nothing playing rn...")
 
 @slash.slash(name="loop",description="Toggle Loop")
 async def loop(ctx):
@@ -123,7 +158,7 @@ async def skip(ctx):
     try:
         player = music.get_player(guild_id=ctx.guild.id)
         song = await player.skip()
-        await ctx.send(f"⏩ Skipped {song[0].name} to {song[1].name}!")
+        await ctx.send(f"⏩ Skipped from {song[0].name} to {song[1].name}!")
     except Exception as error:
         await ctx.send(f":x: {error}")
 
@@ -135,12 +170,12 @@ async def grab(ctx):
         embed = discord.Embed(title=song.name,url=song.url)
         embed.add_field(name="⌛ Duration:",value=f'`{song.duration}`')
         embed.add_field(name="🎵 Creator:",value=f'[`{song.channel}`]({song.channel_url})')
-        embed.add_field(name="▶ Play it:",value=f'`hal.play {song.url}`',inline=False)
+        embed.add_field(name="▶ Play it:",value=f'`/play {song.url}`',inline=False)
         embed.set_thumbnail(url=song.thumbnail)
         await ctx.author.send(embed=embed)
         await ctx.send("Check your DMs!",hidden=True)
     except:
-        await ctx.send(":open_mouth: Wow, such empty...",hidden=True)
+        await ctx.send(":open_mouth: Wow, so empty...",hidden=True)
         
 @slash.slash(name="nowplaying",description="Currently playing Song")
 async def nowplaying(ctx):
@@ -149,7 +184,7 @@ async def nowplaying(ctx):
         song = player.now_playing()
         await ctx.send(song.name)
     except:
-        await ctx.send(":open_mouth: No songs are playing! If this is an error please join the support server!")
+        await ctx.send(":open_mouth: Wow, so empty...")
 
 @slash.slash(name="volume",description="Adjust the Volume",options=[
   create_option(name="volume",description='New Volume',option_type=4,required=False)
@@ -162,7 +197,7 @@ async def volume(ctx,volume:int=100):
     except Exception as error:
         await ctx.send(error)    
 
-@slash.slash(name="pause",description="Pause the Song")
+@slash.slash(name="pause",description="Pause the Player")
 async def pause(ctx):
     try:
         player = music.get_player(guild_id=ctx.guild.id)
@@ -171,7 +206,7 @@ async def pause(ctx):
     except Exception as error:
         await ctx.send(error)
 
-@slash.slash(name="resume",description="Resume the Song")
+@slash.slash(name="resume",description="Resume the Player")
 async def resume(ctx):
     try:
         player = music.get_player(guild_id=ctx.guild.id)
@@ -186,6 +221,9 @@ async def leave(ctx):
     voice = ctx.author.voice
     myvoice = ctx.guild.me.voice
     if not voice or not myvoice:
-        return await ctx.send("You are not in a Voice Channel! If this is an error please join the support server!",hidden=True)
+        return await ctx.send("Either me or you aren't in a voice channel!",hidden=True)
     await ctx.voice_client.disconnect()
-    await ctx.send('Left The Voice Channel.')
+    await ctx.send('Left!')
+
+
+client.run("TOKEN GOES HERE",reconnect=True)
