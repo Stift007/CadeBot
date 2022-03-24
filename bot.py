@@ -72,7 +72,7 @@ async def on_ready():
 
 @tasks.loop(seconds=2)
 async def statusCycle():
-    stats = [f"{len(client.guilds)} Servers!","Glory 4 Ukraine", "Cade BETA"]
+    stats = [f"{len(client.guilds)} Servers!","Status Here", "Status Here"]
     for s in stats:
       await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,name=s),status=discord.Status.dnd)
       await asyncio.sleep(20)
@@ -83,7 +83,7 @@ async def statusCycle():
 async def suggest(ctx,suggestion):
     embed = discord.Embed(title="New Suggestion!",description=f"Suggestion by {ctx.author} ({ctx.author.id})")
     embed.add_field(name="Suggestion",value=suggestion)
-    await client.get_channel(950449511698948166).send(embed=embed)
+    await client.get_channel(ChannelID).send(embed=embed)
     await ctx.send("Your suggestion has been posted!",hidden=True)
 
 @slash.slash(name="serversupport",description="Gets a server representative to join the server",options=[
@@ -94,7 +94,7 @@ async def serversupport(ctx,invite, reason):
     embed = discord.Embed(title="Support Request",description=f"Suggestion by {ctx.author} ({ctx.author.id})")
     embed.add_field(name="Invite",value=invite)
     embed.add_field(name="Reason",value=reason)
-    await client.get_channel(955885682033852436).send(embed=embed)
+    await client.get_channel(ChannelID).send(embed=embed)
     await ctx.send("Sent request: This may take up to 1-2 Working Days!",hidden=True)
         
  
