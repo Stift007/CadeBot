@@ -3,6 +3,7 @@ from discord.ext import commands
 import DiscordUtils
 from DiscordUtils.Music import MusicPlayer,Song
 import discord
+import json
 from time import strftime
 from loguru import logger
 
@@ -12,6 +13,14 @@ from discord_slash.utils.manage_commands import create_option
 client = commands.AutoShardedBot(command_prefix='c!',case_insensitive=True)#shard_count=100)
 slash = SlashCommand(client,sync_commands=True)
 music = DiscordUtils.Music()
+
+with open("config.json") as f:
+    cfg = json.load(f)
+
+SuggestionChannelID = cfg["Suggestion_Channel_ID"]
+SupportChannelID = cfg["Support_Channel_ID"]
+HttpOAuthToken = cfg["Token"]
+ShardlogChannelID = cfg["Shards_Channel_ID"]
 
 
 @client.event
@@ -26,23 +35,8 @@ async def on_shard_connect(shard_id):
     🌐 | Shard `{shard_id}`
     :date: | Time & Date: `{strftime('%H:%M:%S')}`-`{strftime('%D')}`
     """)
-    await client.get_guild(942148719590113300).get_channel(942403453228048406).send(embed=embed)
+    await client.get_channel(ShardlogChannelID).send(embed=embed)
 
-
-@client.event
-async def on_shard_reconnect(shard_id):
-    logger.warning("Shard Reonnect - BETA")
-
-    embed = discord.Embed(title="Shard Reconnected - BETA",description=f"""
-✔ | Shard `{shard_id}` Reconnected!!
-:link: | [Discord Status](https://discordstatus.com)
-:robot: | `{client.command_prefix}ping`
-    """,color=0x00ff00)
-    embed.add_field(name="Shard Information",value=f"""
-    🌐 | Shard `{shard_id}`
-    :date: | Time & Date: `{strftime('%H:%M:%S')}`-`{strftime('%D')}`
-    """)
-    await client.get_guild(942148719590113300).get_channel(942403453228048406).send(embed=embed)
     
 @slash.slash(name="ping",description="Wanna play PING PONG ;)")
 async def ping(ctx):
@@ -60,7 +54,7 @@ async def on_shard_disconnect(shard_id):
     🌐 | Shard `{shard_id}`
     :date: | Time & Date: `{strftime('%H:%M:%S')}`-`{strftime('%D')}`
     """)
-    await client.get_guild(942148719590113300).get_channel(942403453228048406).send(embed=embed)
+    await client.get_channel(ShardlogChannelID).send(embed=embed)
 
     
 from discord.ext import tasks
@@ -72,7 +66,7 @@ async def on_ready():
 
 @tasks.loop(seconds=2)
 async def statusCycle():
-    stats = [f"{len(client.guilds)} Servers!","Status Here", "Status Here"]
+    stats = [f"{len(client.guilds)} Servers!"]
     for s in stats:
       await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,name=s),status=discord.Status.dnd)
       await asyncio.sleep(20)
@@ -83,7 +77,7 @@ async def statusCycle():
 async def suggest(ctx,suggestion):
     embed = discord.Embed(title="New Suggestion!",description=f"Suggestion by {ctx.author} ({ctx.author.id})")
     embed.add_field(name="Suggestion",value=suggestion)
-    await client.get_channel(ChannelID).send(embed=embed)
+    await client.get_channel(SuggestChannelID).send(embed=embed)
     await ctx.send("Your suggestion has been posted!",hidden=True)
 
 @slash.slash(name="serversupport",description="Gets a server representative to join the server",options=[
@@ -94,7 +88,7 @@ async def serversupport(ctx,invite, reason):
     embed = discord.Embed(title="Support Request",description=f"Suggestion by {ctx.author} ({ctx.author.id})")
     embed.add_field(name="Invite",value=invite)
     embed.add_field(name="Reason",value=reason)
-    await client.get_channel(ChannelID).send(embed=embed)
+    await client.get_channel(SupportChannelID).send(embed=embed)
     await ctx.send("Sent request: This may take up to 1-2 Working Days!",hidden=True)
         
  
@@ -106,6 +100,24 @@ async def join(ctx):
     await ctx.author.voice.channel.connect()
     await ctx.send('Joined!')
 
+@slash.slash(name="commands",description="View a command list!")
+async def cmds(ctx):
+    embed = discord.Embed(title="CadeBot Help")
+    embed.add_field(name="Play",value="/play <query> [optn:bettersearch (True|False)]")
+    embed.add_field(name="Stop",value="/stop")
+    embed.add_field(name="Nowplaying",value="/nowplaying")
+    embed.add_field(name="Grab",value="/grab")
+    embed.add_field(name="Queue",value="/queue")
+    embed.add_field(name="Volume",value="/volume <new-volume>")
+    embed.add_field(name="Skip",value="/skip")
+    embed.add_field(name="PING",value="/ping")
+    embed.add_field(name="Join",value="/join")
+    embed.add_field(name="Leave",value="/leave")
+    embed.add_field(name="Pause",value="/pause")
+    embed.add_field(name="Resume",value="/resume")
+    embed.add_field(name="Loop",value="/loop")
+    await ctx.send(embed=embed,hidden=True)
+    
 @slash.slash(name="play",description="Play Music!",options=[
   create_option(name="query",description="Search Query",option_type=3,required=False),
   create_option(name="bettersearch",description="Use BetterSearch?",option_type=5,required=False),
@@ -114,7 +126,7 @@ async def play(ctx, query=None,bettersearch=False):
     if not query:
         return await ctx.send("Please specify a search query...")
     if not ctx.guild.voice_client:
-        return await ctx.send("I am not connected to any VOice channel!")
+        return await ctx.send("I am not connected to any Voice channel!")
     player = music.get_player(guild_id=ctx.guild.id)
     if not player:
         player = music.create_player(ctx, ffmpeg_error_betterfix=True)
@@ -175,7 +187,7 @@ async def grab(ctx):
         await ctx.author.send(embed=embed)
         await ctx.send("Check your DMs!",hidden=True)
     except:
-        await ctx.send(":open_mouth: Wow, so empty...",hidden=True)
+        await ctx.send(":open_mouth: Wow, such empty...",hidden=True)
         
 @slash.slash(name="nowplaying",description="Currently playing Song")
 async def nowplaying(ctx):
@@ -184,7 +196,7 @@ async def nowplaying(ctx):
         song = player.now_playing()
         await ctx.send(song.name)
     except:
-        await ctx.send(":open_mouth: Wow, so empty...")
+        await ctx.send(":open_mouth: Wow, such empty...")
 
 @slash.slash(name="volume",description="Adjust the Volume",options=[
   create_option(name="volume",description='New Volume',option_type=4,required=False)
@@ -226,4 +238,4 @@ async def leave(ctx):
     await ctx.send('Left!')
 
 
-client.run("TOKEN GOES HERE",reconnect=True)
+client.run(HttpOAuthToken,reconnect=True)
