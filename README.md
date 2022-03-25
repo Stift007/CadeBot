@@ -24,13 +24,13 @@ The commands are simple. We have, from the start, decided to use Slash Commands,
 ## FAQ
 
 
-Q) Cade is offline, what should I do?
+Q) Cade is offline, what should I do?  
 A) Check the status channel. And report to the Admins.
 
-Q) Cade is offline on my server, but online on other servers! Now what?
+Q) Cade is offline on my server, but online on other servers! Now what?  
 A) Cade uses a System called `Sharding`, meaning different Bot instances. However, shards may go down from time to time. Be patient, they'll come back again
 
-Q) Will there ever be Cade Premium?
+Q) Will there ever be Cade Premium?  
 A) Chances are there, but I don't think so. Besides, who would actually pay money to get more features on a bot that's complete trash?
 
 FAQ Will be updated every few days.
