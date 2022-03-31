@@ -1,0 +1,5 @@
+/.env
+/venv
+/data/secrets.xml
+/bot/__pycache__
+/jdk-13.0.2
